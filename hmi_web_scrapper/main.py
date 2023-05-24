@@ -1,20 +1,26 @@
+import threading
 from web.driver import ChromeDriver
 from web.scrapper import Scrapper
-import threading
-from local_db.inserter import FolderWatchdog
-from hmi.server import ModbusServer
+from sql.record_ingestor import RecordIngestor
+from raspberry.modbus_server import ModbusServer
+
+import configparser
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+hmi_ip_address = config['hmi']['ip']
 
 
-url = 'http://10.13.141.120/logs/Customs/'
+
+url = f'http://{hmi_ip_address}/logs/Customs/'
 
 def main():
 
     # create an instance of FolderWatchdog
-    watchdog = FolderWatchdog('my_database.db', '/path/to/your/folder')
-
-    # run the FolderWatchdog in a new thread
-    thread = threading.Thread(target=watchdog.run)
-    thread.start()
+    ingestor = RecordIngestor(r"downloads")
+    ingestor_thread = threading.Thread(target=ingestor.start)
+    ingestor_thread.start()
 
     # create an instance of ModbusServer
     modbus_server = ModbusServer()
