@@ -1,17 +1,19 @@
-import sqlite3
-from sqlite3 import Error
+import pyodbc
+from pyodbc import Error
 
 class DBManager:
-    def __init__(self, db_file):
-        """ initialize the DBManager with the database file name """
-        self.db_file = db_file
+    def __init__(self, driver, server, database, user, password):
+        """ initialize the DBManager with the database details """
+        self.driver = driver
+        self.server = server
+        self.database = database
+        self.user = user
+        self.password = password
         self.conn = None
-
-        
 
     def connect(self):
         try:
-            self.conn = sqlite3.connect(self.db_file)
+            self.conn = pyodbc.connect('DRIVER={'+self.driver+'};SERVER='+self.server+';DATABASE='+self.database+';UID='+self.user+';PWD='+ self.password)
         except Error as e:
             print(e)
         
@@ -25,9 +27,9 @@ class DBManager:
     def __get_column_names(self, table):
         """ retrieve the column names of a table """
         cursor = self.conn.cursor()
-        cursor.execute(f"PRAGMA table_info({table})")
+        cursor.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}'")
         columns = cursor.fetchall()
-        return [col[1] for col in columns]
+        return [col[0] for col in columns]
     
     def insert(self, table, data):
         """
@@ -42,7 +44,6 @@ class DBManager:
         column_names = self.__get_column_names(table)
         placeholders = ', '.join('?' * len(column_names))
         sql = f'INSERT INTO {table} VALUES ({placeholders})'
-
         
         cursor = self.conn.cursor()
         cursor.execute(sql, tuple(data))
