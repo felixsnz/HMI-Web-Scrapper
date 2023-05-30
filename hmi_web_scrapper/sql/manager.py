@@ -2,9 +2,8 @@ import pyodbc
 from pyodbc import Error
 
 class DBManager:
-    def __init__(self, driver, server, database, user, password):
+    def __init__(self, server, database, user, password):
         """ initialize the DBManager with the database details """
-        self.driver = driver
         self.server = server
         self.database = database
         self.user = user
@@ -13,11 +12,10 @@ class DBManager:
 
     def connect(self):
         try:
-            self.conn = pyodbc.connect('DRIVER={'+self.driver+'};SERVER='+self.server+';DATABASE='+self.database+';UID='+self.user+';PWD='+ self.password)
+            self.conn = pyodbc.connect('DRIVER={FreeTDS};SERVER='+self.server+';PORT=1433;DATABASE='+self.database+';UID='+self.user+';PWD='+ self.password+';TDS_Version=7.3')
         except Error as e:
             print(e)
         
-    
     def disconnect(self):
         """ close the database connection """
         if self.conn:
