@@ -5,14 +5,16 @@ from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
 import threading
 import time
 
-from config import ip_address as raspberry_ip
+from raspberry.config import ip_address as raspberry_ip
+from utils.logger import get_logger
 
 class ModbusServer:
-    def __init__(self, coil_address=1, initial_coil_state=True, host=raspberry_ip, port=502):
+    def __init__(self, coil_address=0, initial_coil_state=True, host=raspberry_ip, port=502):
         self.coil_address = coil_address
         self.initial_coil_state = initial_coil_state
         self.host = host
         self.port = port
+        self.logger = get_logger(__name__)
 
         # Create a datastore and initialize it with a coil at address 000001 set to False
         self.store = ModbusSlaveContext(
@@ -29,25 +31,21 @@ class ModbusServer:
         self.identity.ModelName = 'Pymodbus Server'
         self.identity.MajorMinorRevision = '1.0'
     
-    def toggle_coil(self):
-        while True:
-            coils = self.store.getValues(1, self.coil_address)
+    def setup(self):
+        # Write the initial state to the coil
+        
+        self.store.setValues(1, self.coil_address, [self.initial_coil_state])
 
-            current_state = self.initial_coil_state
-            if len(coils) > 0:
-                current_state = self.store.getValues(1, self.coil_address)[0]
-
-            # Write the opposite state to the coil
-            self.store.setValues(1, self.coil_address, [not current_state])
-
-            # Wait for 1 second
-            time.sleep(15)
-            print("toggling:", current_state)
     
     def run(self):
-        # Start a new thread that toggles the coil state every second
-        toggle_thread = threading.Thread(target=self.toggle_coil)
-        toggle_thread.start()
+        setup_thread = threading.Thread(target=self.setup)
+        setup_thread.start()
 
-        # Start the Modbus TCP server
-        StartTcpServer(context=self.context, identity=self.identity, address=(self.host, self.port))
+        while True:
+            try:
+                self.server = StartTcpServer(context=self.context, identity=self.identity, address=(self.host, self.port))
+            except OSError as e:
+                self.logger.error("OSError occurred, retrying after 3 seconds... Error: {e}")
+                time.sleep(3)
+                continue
+            break
