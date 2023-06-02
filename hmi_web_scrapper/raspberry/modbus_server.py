@@ -33,7 +33,6 @@ class ModbusServer:
     
     def setup(self):
         # Write the initial state to the coil
-        
         self.store.setValues(1, self.coil_address, [self.initial_coil_state])
 
     
@@ -46,6 +45,7 @@ class ModbusServer:
                 self.server = StartTcpServer(context=self.context, identity=self.identity, address=(self.host, self.port))
             except OSError as e:
                 self.logger.error("OSError occurred, retrying after 3 seconds... Error: {e}")
+                print("os error!")
                 time.sleep(3)
                 continue
             break
