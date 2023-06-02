@@ -1,6 +1,6 @@
 import time
 import subprocess
-from raspberry.modbus_client import ModbusClient
+from raspberry.modbus import ModbusClient
 from raspberry.config import ip_address as raspberry_ip
 from utils.logger import get_logger
 
