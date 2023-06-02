@@ -2,6 +2,8 @@ from pymodbus.server.async_io import StartTcpServer
 from pymodbus.device import ModbusDeviceIdentification
 from pymodbus.datastore import ModbusSequentialDataBlock
 from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
+from pymodbus.client import ModbusTcpClient
+from pymodbus.pdu import ModbusResponse
 import threading
 import time
 
@@ -44,8 +46,27 @@ class ModbusServer:
             try:
                 self.server = StartTcpServer(context=self.context, identity=self.identity, address=(self.host, self.port))
             except OSError as e:
-                self.logger.error("OSError occurred, retrying after 3 seconds... Error: {e}")
-                print("os error!")
+                self.logger.error(f"OSError occurred, retrying after 3 seconds... Error: {e}")
                 time.sleep(3)
                 continue
             break
+
+
+class ModbusClient:
+    def __init__(self, host=raspberry_ip, port=502):
+        self.host = host
+        self.port = port
+        self.client = ModbusTcpClient(self.host, self.port)
+        self.logger = get_logger(__name__, self.__class__.__name__)
+
+    def read_coil(self, coil_addr):
+        response:ModbusResponse = self.client.read_coils(coil_addr, 1)
+        if response.isError():
+            self.logger.error(f"Error reading coil at address {coil_addr}")
+        else:
+            return response.bits[0]
+
+    def write_coil(self, coil_addr, value):
+        response:ModbusResponse = self.client.write_coil(coil_addr, value)
+        if response.isError():
+            self.logger.error(f"Error writing coil at address {coil_addr}")
