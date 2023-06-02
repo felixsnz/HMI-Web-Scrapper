@@ -2,24 +2,19 @@ import csv
 import json
 import pyodbc
 import configparser
+from config import host, database, user, password
 
-# Read database configuration
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-host = config['sql']['host']
-database = config['sql']['database']
-user = config['sql']['user']
-password = config['sql']['password']
 
 # Construct the connection string
-connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={host};DATABASE={database};UID={user};PWD={password}'
+connection_string = 'DRIVER={FreeTDS};SERVER='+host+';PORT=1433;DATABASE='+database+';UID='+user+';PWD='+password+';TDS_Version=7.3'
+
+Standard = "E28"
 
 # The column to be set as the primary key
-primary_key = 'E28.SerialNumber'
+primary_key = f'{Standard}.SerialNumber'
 
 def main():
-    data = csv_to_json_dict(r'data\05231527.CSV')
+    data = csv_to_json_dict(r'data/05231527.CSV')
     json_to_sql(data)
 
 
@@ -51,7 +46,7 @@ def create_column_dict(name, primary):
             "nullable": False,
             "default": None
         })
-    elif 'MeasurementUnit' in name or 'E28.EmployeeNumber' in name or 'E28.SerialNumber' in name or 'E28.YorkPN' in name:
+    elif 'MeasurementUnit' in name or f'{Standard}.EmployeeNumber' in name or f'{Standard}.SerialNumber' in name or f'{Standard}.YorkPN' in name:
         column.update({
             "type": "string",
             "length": 50,
@@ -70,7 +65,7 @@ def csv_to_json_dict(csv_filepath):
         columns = next(reader)
 
         data = {
-            "table_name": "E28",
+            "table_name": Standard,
             "columns": [create_column_dict(name, name==primary_key) for name in columns]
         }
 
