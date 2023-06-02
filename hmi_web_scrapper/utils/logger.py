@@ -24,11 +24,9 @@ def get_logger(name, class_name=None):
 
     # Create a file handler
     today = datetime.now()
-    week_number = today.isocalendar()[1]
-    year = today.year
     log_dir = 'logs'
     os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, f'{week_number}_{year}.log')
+    log_file = os.path.join(log_dir, f'{today.strftime("%d_%m_%Y")}.log')
     handler = logging.FileHandler(log_file)
     handler.setLevel(logging.DEBUG)
 
