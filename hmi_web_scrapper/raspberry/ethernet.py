@@ -27,12 +27,12 @@ class InterfaceMonitor:
                 if status != self.last_status:
                     if status == 'up':
                         self.modbus_client.write_coil(0, 1)
-                        self.logger.info(f"Ethernet device '{self.name}' is connected")
+                        self.logger.info(f"Ethernet interface '{self.name}' is connected")
                     elif status == 'down':
                         self.modbus_client.write_coil(0, 0)
-                        self.logger.info(f"Ethernet device '{self.name}' is disconnected")
+                        self.logger.info(f"Ethernet interface '{self.name}' is disconnected")
                     else:
-                        self.logger.warn(f"Unknown status for device '{self.name}' : {status}")
+                        self.logger.warn(f"Unknown status for interface '{self.name}' status: {status}")
                     self.last_status = status
                 time.sleep(0.5)
             except:
