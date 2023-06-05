@@ -166,3 +166,5 @@ cython_debug/
 #input and output files
 
 /data
+
+.vscode
