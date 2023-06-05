@@ -23,8 +23,7 @@ class Scrapper:
             while True:
                 try:
                     
-                    # Navigate or refresh the page
-                    self.driver.navigate(self.url)
+                    # refresh the page
                     self.driver.refresh()
 
                     csv_files = self.get_csv_files()
