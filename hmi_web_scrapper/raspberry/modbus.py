@@ -16,7 +16,7 @@ class ModbusServer:
         self.initial_coil_state = initial_coil_state
         self.host = host
         self.port = port
-        self.logger = get_logger(__name__)
+        self.logger = get_logger(__name__, self.__class__.__name__)
 
         # Create a datastore and initialize it with a coil at address 000001 set to False
         self.store = ModbusSlaveContext(
@@ -36,6 +36,7 @@ class ModbusServer:
     def setup(self):
         # Write the initial state to the coil
         self.store.setValues(1, self.coil_address, [self.initial_coil_state])
+        self.logger.info("modbus server setup finished...")
 
     
     def run(self):
@@ -44,6 +45,7 @@ class ModbusServer:
 
         while True:
             try:
+                self.logger.info(f"starting server at {self.host}:{self.port}")
                 self.server = StartTcpServer(context=self.context, identity=self.identity, address=(self.host, self.port))
             except OSError as e:
                 self.logger.error(f"OSError occurred, retrying after 3 seconds... Error: {e}")
@@ -64,9 +66,12 @@ class ModbusClient:
         if response.isError():
             self.logger.error(f"Error reading coil at address {coil_addr}")
         else:
+            self.logger.debug(f"read value: {response.decode()} from coild address: {coil_addr}")
             return response.bits[0]
 
     def write_coil(self, coil_addr, value):
         response:ModbusResponse = self.client.write_coil(coil_addr, value)
         if response.isError():
             self.logger.error(f"Error writing coil at address {coil_addr}")
+        else:
+            self.logger.debug(f"value: {value} written at coild address: {coil_addr}")

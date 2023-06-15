@@ -1,11 +1,4 @@
 import socket
+import netifaces as ni
 
-import configparser
-
-# Read database configuration
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-ip_address = config['raspberry']['ip']
-
-hostname = socket.gethostname()
+ip_address = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']

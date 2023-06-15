@@ -24,6 +24,7 @@ def get_logger(name, class_name=None):
 
     # Create a file handler
     today = datetime.now()
+    #log_dir = '/home/felix/Desktop/hmi_web_scrapper/logs'
     log_dir = 'logs'
     os.makedirs(log_dir, exist_ok=True)
     log_file = os.path.join(log_dir, f'{today.strftime("%d_%m_%Y")}.log')
