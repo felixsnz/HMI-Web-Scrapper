@@ -1,5 +1,4 @@
 pandas==2.0.1
 pymodbus==3.2.2
 Requests==2.31.0
-selenium==4.9.1
 watchdog==3.0.0
