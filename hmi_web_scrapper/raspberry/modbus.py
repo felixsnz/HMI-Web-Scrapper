@@ -11,16 +11,15 @@ from raspberry.config import ip_address as raspberry_ip
 from utils.logger import get_logger
 
 class ModbusServer:
-    def __init__(self, coil_address=0, initial_coil_state=True, host=raspberry_ip, port=502):
-        self.coil_address = coil_address
-        self.initial_coil_state = initial_coil_state
+    def __init__(self, initial_coil_states=[False, False, False], host=raspberry_ip, port=502):
+        self.initial_coil_states = initial_coil_states
         self.host = host
         self.port = port
         self.logger = get_logger(__name__, self.__class__.__name__)
 
         # Create a datastore and initialize it with a coil at address 000001 set to False
         self.store = ModbusSlaveContext(
-            co=ModbusSequentialDataBlock(self.coil_address, [self.initial_coil_state])
+            co=ModbusSequentialDataBlock(0, self.initial_coil_states)
         )
         self.context = ModbusServerContext(slaves=self.store, single=True)
 
@@ -35,7 +34,7 @@ class ModbusServer:
     
     def setup(self):
         # Write the initial state to the coil
-        self.store.setValues(1, self.coil_address, [self.initial_coil_state])
+        self.store.setValues(1, 0, self.initial_coil_states)
         self.logger.info("modbus server setup finished...")
 
     
@@ -66,12 +65,12 @@ class ModbusClient:
         if response.isError():
             self.logger.error(f"Error reading coil at address {coil_addr}")
         else:
-            self.logger.debug(f"read value: {response.decode()} from coild address: {coil_addr}")
+            self.logger.debug(f"read value: {response} from coild address: {coil_addr}")
             return response.bits[0]
 
     def write_coil(self, coil_addr, value):
         response:ModbusResponse = self.client.write_coil(coil_addr, value)
         if response.isError():
-            self.logger.error(f"Error writing coil at address {coil_addr}")
+            self.logger.error(f"Error writing coil at address {coil_addr}, resp: {response}")
         else:
             self.logger.debug(f"value: {value} written at coild address: {coil_addr}")
