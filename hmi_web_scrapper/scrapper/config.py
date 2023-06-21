@@ -4,7 +4,7 @@ import threading
 
 # Read database configuration
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('/home/felix/projects/hmi_web_scrapper/config.ini')
 
 host = config['sql']['host']
 database = config['sql']['database']

@@ -1,4 +1,6 @@
-import socket
-import netifaces as ni
+import configparser
+# Read database configuration
+config = configparser.ConfigParser()
+config.read('/home/felix/projects/hmi_web_scrapper/config.ini')
 
-ip_address = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
+ip_address = config['raspberry']['ip']
