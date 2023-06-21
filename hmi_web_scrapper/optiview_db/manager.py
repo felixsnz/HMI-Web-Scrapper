@@ -1,4 +1,5 @@
 import pyodbc
+import pandas as pd
 from pyodbc import Error
 from utils.logger import get_logger
 
@@ -10,23 +11,24 @@ class DbManager:
         self.user = user
         self.password = password
         self.conn_str = 'DRIVER={FreeTDS};SERVER='+self.server+';PORT=1433;DATABASE='+self.database+';UID='+self.user+';PWD='+ self.password+';TDS_Version=7.3'
-
+        self.connected = False
         self.conn = None
         self.logger = get_logger(__name__)
 
     def connect(self):
         try:
             self.conn = pyodbc.connect(self.conn_str)
-            self.logger.info("successfull connection!")
+            self.connected =  True
         except Error as e:
             self.logger.error(f"Couldn't connect. connection string: {self.conn_str}")
+            self.connected = False
         
     def disconnect(self):
         """ close the database connection """
         if self.conn:
             self.conn.close()
             self.conn = None
-            self.logger.info(f"disconectiong from {self.database} at {self.server}")
+            self.connected = False
 
     def _get_column_names(self, table):
         """ retrieve the column names of a table """
@@ -49,14 +51,19 @@ class DbManager:
             self.logger.warn("There is no database connection.")
             return
         
+        # Replace 'nan' with 'None'
+        data = [None if pd.isna(val) else val for val in data]
+        
         column_names = self._get_column_names(table)
         placeholders = ', '.join('?' * len(column_names))
         sql = f'INSERT INTO {table} VALUES ({placeholders})'
         
+        self.logger.debug(f"insert sql query: {sql}")
+        
         cursor = self.conn.cursor()
         cursor.execute(sql, tuple(data))
         self.conn.commit()
-        self.logger.info(f"Data: {data} inserted at {self.server}:{self.database}:{table}")
+        self.logger.debug(f"Data: {data} inserted at {self.server}:{self.database}:{table}")
     
 
     def get_data(self, table, condition=None):
