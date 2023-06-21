@@ -170,3 +170,5 @@ cython_debug/
 *tool_scripts
 
 .vscode
+
+*table_cleaner.py
