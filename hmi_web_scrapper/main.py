@@ -3,7 +3,6 @@ from optiview_db.host_ping_monitor import HostPingMonitor
 from raspberry.modbus import ModbusServer, ModbusClient
 from raspberry.ethernet import InterfaceMonitor
 
-from scrapper.event_handlers import RecordLogEventHandler
 from scrapper.watcher import LogWatcher
 from utils.logger import get_logger
 from utils.threads import StoppableThread
@@ -47,7 +46,7 @@ def main():
     ingestor_thread.start()
     
     time.sleep(5)
-    logs_watcher = LogWatcher(RecordLogEventHandler())
+    logs_watcher = LogWatcher()
     logs_watcher_thread = threading.Thread(target=logs_watcher.run)
     logs_watcher_thread.start()
 

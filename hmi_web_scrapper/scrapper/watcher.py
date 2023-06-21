@@ -3,7 +3,6 @@ import configparser
 import os
 import time
 
-from scrapper.event_handlers import CsvLogEvent, CsvLogEventHandler
 from optiview_db.manager import DbManager
 from optiview_db.config import host, database, user, password
 from utils.logger import get_logger
@@ -16,9 +15,8 @@ hmi_user = config['hmi']['user']
 hmi_password = config['hmi']['password']
 
 class LogWatcher:
-    def __init__(self, event_handler:CsvLogEventHandler):
+    def __init__(self):
         self.csv_files = []
-        self.event_handler = event_handler
         self.logger = get_logger(__name__)
         
         
@@ -59,7 +57,6 @@ class LogWatcher:
             try:
                 with open(local_filename, 'wb') as f:
                     self.ftp.retrbinary('RETR ' + filename, f.write)
-                    self.event_handler.on_created(CsvLogEvent(filename, local_filename))
                     #self.logger.info(f"Downloaded and saved file {filename}")
             except Exception as e:
                 self.logger.error(f"Failed to download file {filename}: {e}")
