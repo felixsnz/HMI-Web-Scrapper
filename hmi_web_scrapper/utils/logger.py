@@ -15,6 +15,30 @@ class ClassnameFormatter(logging.Formatter):
             record.__dict__['funcName'] = fn
         return super().format(record)
 
+class DailyFileHandler(logging.Handler):
+    def __init__(self, log_dir, level=logging.NOTSET):
+        super().__init__(level)
+        self.log_dir = log_dir
+        self.log_file = None
+        self.handler = None
+        self.today = datetime.now().date()
+
+    def emit(self, record):
+        if self.handler is None or datetime.now().date() != self.today:
+            self.today = datetime.now().date()
+            if self.handler is not None:
+                self.handler.close()
+            self.log_file = os.path.join(self.log_dir, f'{self.today.strftime("%d_%m_%Y")}.log')
+            self.handler = logging.FileHandler(self.log_file)
+            self.handler.setLevel(self.level)
+            self.handler.setFormatter(self.formatter)
+        self.handler.emit(record)
+
+    def close(self):
+        if self.handler is not None:
+            self.handler.close()
+
+# and update your get_logger function
 def get_logger(name, class_name=None):
     # Create a logger
     logger = logging.getLogger(name)
@@ -23,12 +47,9 @@ def get_logger(name, class_name=None):
     logger.setLevel(logging.DEBUG)
 
     # Create a file handler
-    today = datetime.now()
-    #log_dir = '/home/felix/Desktop/hmi_web_scrapper/logs'
-    log_dir = 'logs'
+    log_dir = '/home/felix/projects/hmi_web_scrapper/logs'
     os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, f'{today.strftime("%d_%m_%Y")}.log')
-    handler = logging.FileHandler(log_file)
+    handler = DailyFileHandler(log_dir)
     handler.setLevel(logging.DEBUG)
 
     # Create a logging format
