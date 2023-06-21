@@ -9,7 +9,7 @@ from optiview_db.config import host, database, user, password
 from utils.logger import get_logger
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('/home/felix/projects/hmi_web_scrapper/config.ini')
 
 hmi_ip_address = config['hmi']['ip']
 hmi_user = config['hmi']['user']
@@ -27,14 +27,14 @@ class LogWatcher:
             self.ftp = ftplib.FTP(hmi_ip_address)
             self.ftp.login(hmi_user, hmi_password)
             self.ftp.cwd("logs")
-            self.logger.info("Successfully connected to FTP.")
+            #self.logger.info("Successfully connected to FTP.")
         except Exception as e:
             self.logger.error(f"Failed to connect to FTP: {e}")
 
     def disconnect_ftp(self):
         try:
             self.ftp.quit()
-            self.logger.info("Disconnected from FTP.")
+            #self.logger.info("Disconnected from FTP.")
         except Exception as e:
             self.logger.error(f"Failed to disconnect from FTP: {e}")
 
@@ -43,21 +43,24 @@ class LogWatcher:
         filename = line_parts[-1]
         if filename.lower().endswith('.csv'):
             self.csv_files.append(filename)
-            self.logger.info(f"Found CSV file: {filename}")
+            
+            #self.logger.info(f"Found CSV file: {filename}")
 
     def download_file(self, folder_name, filename):
-        local_dir = os.path.join("downloads", folder_name)
+        #self.logger.info(f"downloading file.... {filename}")
+        local_dir = os.path.join("/home/felix/projects/hmi_web_scrapper/downloads", folder_name)
         # Check if directory exists before downloading, create it if it doesn't
         if not os.path.isdir(local_dir):
             os.makedirs(local_dir, exist_ok=True)
 
         local_filename = os.path.join(local_dir, filename)
+        #self.logger.info(f"local unexpected local file: {local_filename}")
         if not os.path.isfile(local_filename):  # only download if not exist locally
             try:
                 with open(local_filename, 'wb') as f:
                     self.ftp.retrbinary('RETR ' + filename, f.write)
                     self.event_handler.on_created(CsvLogEvent(filename, local_filename))
-                    self.logger.info(f"Downloaded and saved file {filename}")
+                    #self.logger.info(f"Downloaded and saved file {filename}")
             except Exception as e:
                 self.logger.error(f"Failed to download file {filename}: {e}")
         
@@ -71,6 +74,7 @@ class LogWatcher:
                 for folder_name in folder_list:
                     print("moving to", f"logs/{folder_name}")
                     self.ftp.cwd(f"/logs/{folder_name}")
+                    self.csv_files = []
                     self.ftp.retrlines('LIST', self.handle_list)
                     for filename in self.csv_files:
                         self.download_file(folder_name, filename)
