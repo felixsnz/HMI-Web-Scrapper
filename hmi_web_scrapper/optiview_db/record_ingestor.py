@@ -31,7 +31,7 @@ class CsvFileHandler(FileSystemEventHandler):
             self.db_manager.connect()
             time.sleep(3)
         self.logger.info("created file")
-        
+
         time.sleep(3)
         
         inserted = False
@@ -73,15 +73,14 @@ class CsvFileHandler(FileSystemEventHandler):
                     data = [timestamp] + row_list
                     
                     dict_with_types = {v: (v, type(v)) for v in data}
-                    
-                    self.logger.info(f"inserted map: {dict_with_types}")
 
-                    
                     mapping = {'PASS': True, 'FAIL': False}
 
                     mapped_list = [mapping.get(item, item) for item in data]
                     self.db_manager.insert(table, mapped_list)
-                    inserted = True
+                    self.logger.info(f"inserted map: {dict_with_types}")
+                    time.sleep(3) #delay that waits for the data to be uploaded
+                    inserted = self.db_manager.row_exists_by(table, f'{table}.SerialNumber', serial)
                 except Exception as e:
                     self.logger.error(f"Error while inserting csv data: {e}")
                 finally:

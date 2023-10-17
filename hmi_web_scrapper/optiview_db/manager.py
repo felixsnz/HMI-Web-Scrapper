@@ -134,3 +134,32 @@ class DbManager:
             return [table[0] for table in tables]
         except Error as e:
             self.logger.error(f"Couldn't fetch table names. Error: {str(e)}")
+    
+    def row_exists_by(self, table, column_name, value):
+        """
+        Check if a row exists in the table that matches the given column name and value.
+        
+        :param table: The name of the table to query
+        :param column_name: The name of the column to check
+        :param value: The value to match in the column
+        :return: True if a matching row exists, False otherwise
+        """
+        if not self.conn:
+            self.logger.warn("There is no database connection.")
+            return False
+
+        cursor = self.conn.cursor()
+        
+        # Using parameterized query to prevent SQL injection
+        sql = f"SELECT COUNT(*) FROM {table} WHERE {column_name} = ?"
+        
+        self.logger.debug(f"row_exists_by sql query: {sql}")
+
+        try:
+            cursor.execute(sql, (value,))
+            count = cursor.fetchone()[0]
+            exists = count > 0
+            return exists
+        except Error as e:
+            self.logger.error(f"Couldn't execute query. Error: {str(e)}")
+            return False
