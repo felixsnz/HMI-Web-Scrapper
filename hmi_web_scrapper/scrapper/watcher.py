@@ -78,8 +78,8 @@ class LogWatcher:
                     self.ftp.cwd("..")
                 self.disconnect_ftp()
                 db_manager.disconnect()
-                time.sleep(3)  # Adjust this delay to fit your needs.
+                time.sleep(60)  # Adjust this delay to fit your needs.
             except Exception as e:
                 self.logger.error(f"An error occurred in run loop: {e}")
-                time.sleep(5)  # If an error occurs, wait before trying again.
+                time.sleep(90)  # If an error occurs, wait before trying again.
                 continue
