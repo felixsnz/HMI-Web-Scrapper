@@ -3,6 +3,8 @@ import pandas as pd
 from pyodbc import Error
 from utils.logger import get_logger
 
+import platform
+
 class DbManager:
     def __init__(self, server, database, user, password):
         """ initialize the DBManager with the database details """
@@ -10,7 +12,22 @@ class DbManager:
         self.database = database
         self.user = user
         self.password = password
-        self.conn_str = 'DRIVER={FreeTDS};SERVER='+self.server+';PORT=1433;DATABASE='+self.database+';UID='+self.user+';PWD='+ self.password+';TDS_Version=7.3'
+
+        # Detect operating system
+        os_type = platform.system()
+
+        # Select the appropriate driver
+        if os_type == 'Linux':
+            driver = 'FreeTDS'
+        elif os_type == 'Windows':
+            driver = 'SQL Server'
+        else:
+            self.logger.error("Unsupported Operating System")
+            return
+
+        # Create the connection string
+        self.conn_str = f'DRIVER={{{driver}}};SERVER={self.server};PORT=1433;DATABASE={self.database};UID={self.user};PWD={self.password};TDS_Version=7.3'
+        
         self.connected = False
         self.conn = None
         self.logger = get_logger(__name__)
