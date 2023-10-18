@@ -47,7 +47,7 @@ def get_logger(name, class_name=None):
     logger.setLevel(logging.DEBUG)
 
     # Create a file handler
-    log_dir = '/home/felix/projects/hmi_web_scrapper/logs'
+    log_dir = 'logs'
     os.makedirs(log_dir, exist_ok=True)
     handler = DailyFileHandler(log_dir)
     handler.setLevel(logging.DEBUG)

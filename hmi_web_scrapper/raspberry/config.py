@@ -1,6 +1,6 @@
 import configparser
 # Read database configuration
 config = configparser.ConfigParser()
-config.read('/home/felix/projects/hmi_web_scrapper/config.ini')
+config.read('config.ini')
 
 ip_address = config['raspberry']['ip']

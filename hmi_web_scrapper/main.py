@@ -14,7 +14,7 @@ import threading
 import configparser
 
 config = configparser.ConfigParser()
-config.read('/home/felix/projects/hmi_web_scrapper/config.ini')
+config.read('config.ini')
 hmi_ip_address = config['hmi']['ip']
 sql_server_hostname = config['sql']['host']
 

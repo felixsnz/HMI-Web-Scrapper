@@ -8,7 +8,7 @@ from optiview_db.config import host, database, user, password
 from utils.logger import get_logger
 
 config = configparser.ConfigParser()
-config.read('/home/felix/projects/hmi_web_scrapper/config.ini')
+config.read('config.ini')
 
 hmi_ip_address = config['hmi']['ip']
 hmi_user = config['hmi']['user']
@@ -46,7 +46,7 @@ class LogWatcher:
 
     def download_file(self, folder_name, filename):
         #self.logger.info(f"downloading file.... {filename}")
-        local_dir = os.path.join("/home/felix/projects/hmi_web_scrapper/downloads", folder_name)
+        local_dir = os.path.join("downloads", folder_name)
         # Check if directory exists before downloading, create it if it doesn't
         if not os.path.isdir(local_dir):
             os.makedirs(local_dir, exist_ok=True)
